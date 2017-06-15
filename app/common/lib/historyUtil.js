@@ -5,7 +5,7 @@
 
 const Immutable = require('immutable')
 const {makeImmutable} = require('../state/immutableUtil')
-const siteUtil = require('../../../js/state/siteUtil')
+const siteCache = require('../state/siteCache')
 const aboutHistoryMaxEntries = 500
 
 module.exports.maxEntries = aboutHistoryMaxEntries
@@ -16,11 +16,12 @@ const sortTimeDescending = (left, right) => {
   return 0
 }
 
-module.exports.getHistory = (sites) => {
-  sites = makeImmutable(sites) ? makeImmutable(sites).toList() : new Immutable.List()
-  return sites.filter((site) => siteUtil.isHistoryEntry(site))
-      .sort(sortTimeDescending)
-      .slice(0, aboutHistoryMaxEntries)
+module.exports.getHistory = (state) => {
+  const siteKeys = siteCache.getHistorySiteKeys(state)
+  const sites = siteKeys.map(key => state.getIn(['sites', key]))
+  return sites
+    .sort(sortTimeDescending)
+    .slice(0, aboutHistoryMaxEntries)
 }
 
 const getDayString = (entry, locale) => {

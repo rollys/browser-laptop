@@ -315,6 +315,7 @@ module.exports.addSite = function (state, siteDetail, tag, originalSiteDetail, s
     site = site.set('location', location)
   }
   const oldLocation = (oldSite && oldSite.get('location')) || site.get('location')
+  state = siteCache.removeHistorySiteKey(state, oldKey)
   state = siteCache.removeLocationSiteKey(state, oldLocation, oldKey)
 
   if (skipSync) {
@@ -327,6 +328,9 @@ module.exports.addSite = function (state, siteDetail, tag, originalSiteDetail, s
     return state
   }
   state = state.setIn(['sites', key], site)
+  if (module.exports.isHistoryEntry(site)) {
+    state = siteCache.addHistorySiteKey(state, key)
+  }
   state = siteCache.addLocationSiteKey(state, location, key)
   return state
 }
@@ -391,6 +395,7 @@ module.exports.removeSite = function (state, siteDetail, tag, reorder = true) {
   }
 
   const location = siteDetail.get('location')
+  state = siteCache.removeHistorySiteKey(state, key)
   state = siteCache.removeLocationSiteKey(state, location, key)
 
   const stateKey = ['sites', key]
@@ -493,6 +498,7 @@ module.exports.moveSite = function (state, sourceKey, destinationKey, prepend,
   }
 
   const location = sourceSite.get('location')
+  state = siteCache.removeHistorySiteKey(state, sourceKey)
   state = siteCache.removeLocationSiteKey(state, location, sourceKey)
   state = state.deleteIn(['sites', sourceKey])
   state = state.set('sites', state.get('sites').map((site) => {
@@ -516,6 +522,9 @@ module.exports.moveSite = function (state, sourceKey, destinationKey, prepend,
     }
   }
   const destinationSiteKey = module.exports.getSiteKey(sourceSite)
+  if (module.exports.isHistoryEntry(sourceSite)) {
+    state = siteCache.addHistorySiteKey(state, destinationSiteKey)
+  }
   state = siteCache.addLocationSiteKey(state, location, destinationSiteKey)
   return state.setIn(['sites', destinationSiteKey], sourceSite)
 }

@@ -36,6 +36,7 @@ describe('historyUtil', function () {
   }])
   const historyMultipleDays = historyDayThree.push(historyDayTwo, historyDayOne)
 
+  // TODO: Fix these tests
   describe('getHistory', function () {
     it('returns the result as an Immutable.List', function () {
       const result = historyUtil.getHistory(historyMultipleDays)

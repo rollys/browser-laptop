@@ -7,18 +7,6 @@ const siteUtil = require('../../../js/state/siteUtil')
 const appUrlUtil = require('../../../js/lib/appUrlUtil')
 const UrlUtil = require('../../../js/lib/urlutil')
 
-const createLocationSiteKeysCache = (state) => {
-  state = state.set('locationSiteKeysCache', new Immutable.Map())
-  state.get('sites').forEach((site, siteKey) => {
-    const location = siteUtil.getLocationFromSiteKey(siteKey)
-    if (!location) {
-      return
-    }
-    state = addLocationSiteKey(state, location, siteKey)
-  })
-  return state
-}
-
 const normalizeLocation = (location) => {
   const sourceAboutUrl = appUrlUtil.getSourceAboutUrl(location)
   if (sourceAboutUrl) {
@@ -27,17 +15,59 @@ const normalizeLocation = (location) => {
   return UrlUtil.getLocationIfPDF(location)
 }
 
-module.exports.loadLocationSiteKeysCache = (state) => {
-  const cache = state.get('locationSiteKeysCache')
-  if (cache) {
-    return state
+module.exports.loadSiteKeyCaches = (state) => {
+  const shouldCacheHistory = !state.get('historySiteKeysCache')
+  const shouldCacheLocation = !state.get('locationSiteKeysCache')
+  if (!shouldCacheHistory) {
+    // Load saved Array as a Set.
+    // TODO: Confirm this is necessary
+    state = state.set('historySiteKeysCache', new Immutable.Set(state.get('historySiteKeysCache')))
+
+    // If caches already exist, return.
+    if (!shouldCacheLocation) {
+      return state
+    }
   }
-  return createLocationSiteKeysCache(state)
+  if (shouldCacheHistory) {
+    state = state.set('historySiteKeysCache', new Immutable.Set())
+  }
+  if (shouldCacheLocation) {
+    state = state.set('locationSiteKeysCache', new Immutable.Map())
+  }
+  const cacheHistory = (site, siteKey) => {
+    if (siteUtil.isHistoryEntry(site)) {
+      state = addHistorySiteKey(state, siteKey)
+    }
+  }
+  const cacheLocation = (site, siteKey) => {
+    const location = siteUtil.getLocationFromSiteKey(siteKey)
+    if (!location) {
+      return
+    }
+    state = addLocationSiteKey(state, location, siteKey)
+  }
+  state.get('sites').forEach((site, siteKey) => {
+    if (shouldCacheHistory) {
+      cacheHistory(site, siteKey)
+    }
+    if (shouldCacheLocation) {
+      cacheLocation(site, siteKey)
+    }
+  })
+  return state
+}
+
+/**
+ * Get appState siteKeys of history sites from cache.
+ * @param state Application state
+ * @return {Immutable.Set<string>|null} history siteKeys
+ */
+module.exports.getHistorySiteKeys = (state) => {
+  return state.get('historySiteKeysCache')
 }
 
 /**
  * Given a location, get matching appState siteKeys based on cache.
- * Loads cache from appState if it hasn't been loaded yet.
  * @param state Application state
  * @param location {string}
  * @return {Immutable.List<string>|null} siteKeys including this location.
@@ -46,6 +76,34 @@ module.exports.getLocationSiteKeys = (state, location) => {
   const normalLocation = normalizeLocation(location)
   return state.getIn(['locationSiteKeysCache', normalLocation])
 }
+
+/**
+ * Given a siteKey, add to cached history siteKeys list.
+ * Returns new state.
+ * @param state Application state
+ * @param siteKey {string}
+ */
+const addHistorySiteKey = (state, siteKey) => {
+  if (!siteKey) {
+    return state
+  }
+  return state.update('historySiteKeysCache', set => set.add(siteKey))
+}
+module.exports.addHistorySiteKey = addHistorySiteKey
+
+/**
+ * Given a siteKey, remove from cached history siteKeys list.
+ * Returns new state.
+ * @param state Application state
+ * @param siteKey {string}
+ */
+const removeHistorySiteKey = (state, siteKey) => {
+  if (!siteKey) {
+    return state
+  }
+  return state.update('historySiteKeysCache', set => set.delete(siteKey))
+}
+module.exports.removeHistorySiteKey = removeHistorySiteKey
 
 /**
  * Given a location, add appState siteKey to cached siteKeys list.

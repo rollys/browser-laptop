@@ -624,6 +624,7 @@ module.exports.defaultAppState = () => {
       lastFetchTimestamp: 0,
       objectsById: {}
     },
+    historySiteKeysCache: undefined,
     locationSiteKeysCache: undefined,
     sites: getTopSiteMap(),
     tabs: [],
