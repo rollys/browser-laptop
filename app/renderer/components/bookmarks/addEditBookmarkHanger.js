@@ -8,7 +8,7 @@ const Immutable = require('immutable')
 // Components
 const ReduxComponent = require('../reduxComponent')
 const Dialog = require('../common/dialog')
-const BrowserButton = require('../common/browserButton')
+const {BrowserButton} = require('../common/browserButton')
 
 // Actions
 const appActions = require('../../../../js/actions/appActions')
