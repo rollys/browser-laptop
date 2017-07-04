@@ -35,7 +35,6 @@ const frameStateUtil = require('../../../../js/state/frameStateUtil')
 // Utils
 const cx = require('../../../../js/lib/classSet')
 const {getBaseUrl} = require('../../../../js/lib/appUrlUtil')
-const {isSourceAboutUrl} = require('../../../../js/lib/appUrlUtil')
 const {getSetting} = require('../../../../js/settings')
 const {isDarwin} = require('../../../common/lib/platformUtil')
 const {isFullScreen} = require('../../currentWindow')

@@ -402,13 +402,6 @@ class UrlBar extends React.Component {
     }
   }
 
-  get hostValue () {
-    const parsed = urlParse(this.props.location)
-    return parsed.host &&
-      parsed.protocol !== 'about:' &&
-      parsed.protocol !== 'chrome-extension:' ? parsed.host : ''
-  }
-
   get titleValue () {
     // For about:newtab we don't want the top of the browser saying New Tab
     // Instead just show "Brave"
@@ -445,7 +438,7 @@ class UrlBar extends React.Component {
 
   // BEM Level: urlbarForm__titleBar
   get titleBar () {
-    return <div id='titleBar' className={css(styles.titleBar)}>
+    return <div id='titleBar' data-test-id='titleBar' className={css(styles.titleBar)}>
       <span className={css(styles.titleBar__host)}>{this.props.hostValue}</span>
       <span>{this.props.hostValue && this.titleValue ? ' | ' : ''}</span>
       <span>{this.titleValue}</span>
