@@ -436,6 +436,14 @@ class UrlBar extends React.Component {
     }
   }
 
+  get urlBarIcon () {
+    return <NavigationBarButtonContainer isSquare>
+      <UrlBarIcon
+        titleMode={this.props.titleMode}
+      />
+    </NavigationBarButtonContainer>
+  }
+
   // BEM Level: urlbarForm__titleBar
   get titleBar () {
     return <div id='titleBar' data-test-id='titleBar' className={css(styles.titleBar)}>
@@ -483,7 +491,7 @@ class UrlBar extends React.Component {
     return <legend className={css(
       styles.legend,
       !!this.props.isFocused && styles.legend_isFocused,
-      this.props.isPublisherButtonEnabled && styles.legend_isPublisherButtonEnabled
+      this.props.publisherButtonVisible && styles.legend_urlBarEnd
     )} />
   }
 
@@ -577,15 +585,12 @@ class UrlBar extends React.Component {
     return <form
       className={cx({
         urlbarForm: true,
-        [css(styles.urlbarForm, this.props.isWideURLbarEnabled && styles.urlbarForm_wide, this.props.titleMode && styles.urlbarForm_titleMode, !this.props.titleMode && styles.urlbarForm_notTitleMode, !this.showNoScriptInfo && styles.urlbarForm_noScriptEnabled, this.props.publisherButtonVisible && styles.urlbarForm_isPublisherButtonEnabled)]: true
+        // currently publisherButtonVisible is the only element under urlbarForm_urlBarEnd
+        [css(styles.urlbarForm, this.props.isWideURLbarEnabled && styles.urlbarForm_wide, this.props.titleMode && styles.urlbarForm_titleMode, !this.props.titleMode && styles.urlbarForm_notTitleMode, !this.showNoScriptInfo && styles.urlbarForm_noScriptEnabled, this.props.publisherButtonVisible && styles.urlbarForm_urlBarEnd)]: true
       })}
       action='#'
       id='urlbar'>
-      <NavigationBarButtonContainer isSquare>
-        <UrlBarIcon
-          titleMode={this.props.titleMode}
-        />
-      </NavigationBarButtonContainer>
+      {this.urlBarIcon}
       {
         this.props.titleMode
         ? this.titleBar
@@ -662,8 +667,8 @@ const styles = StyleSheet.create({
     paddingRight: '10px'
   },
 
-  // ref: navigationBar__buttonContainer_addPublisherButtonContainer on publisherToggle.js
-  urlbarForm_isPublisherButtonEnabled: {
+  // ref: navigationBar__urlBarEnd on navigationBarButtonContainer.js
+  urlbarForm_urlBarEnd: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0
   },
@@ -734,7 +739,7 @@ const styles = StyleSheet.create({
     }
   },
 
-  legend_isPublisherButtonEnabled: {
+  legend_urlBarEnd: {
     ':before': {
       borderRadius: 0
     }
